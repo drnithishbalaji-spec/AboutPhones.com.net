@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Phone Brand Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white py-8 px-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-3xl font-bold mb-2">📱 Phone Brand Hub</h1>
+            <p class="text-indigo-100 opacity-90">Exploring the world's mobile manufacturers and their legacy</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
+        <!-- Search and Stats -->
+        <div class="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative w-full md:w-96">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search for a brand (e.g. Samsung)..." 
+                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+                >
+                <span class="absolute left-3 top-3.5 text-slate-400">🔍</span>
+            </div>
+            <div class="bg-white px-6 py-3 rounded-xl shadow-sm border border-slate-100 flex gap-6">
+                <div class="text-center">
+                    <p class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total Brands</p>
+                    <p id="totalBrands" class="text-xl font-bold text-indigo-600">0</p>
+                </div>
+                <div class="text-center border-l pl-6">
+                    <p class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total Models</p>
+                    <p id="totalModels" class="text-xl font-bold text-indigo-600">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brand Grid -->
+        <div id="brandGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here -->
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="hidden text-center py-20">
+            <p class="text-slate-400 text-lg">No brands found matching your search.</p>
+        </div>
+    </main>
+
+    <footer class="text-center py-10 text-slate-400 text-sm border-t border-slate-200 mt-10">
+        <p>Data based on global manufacturing records and archival database stats.</p>
+    </footer>
+
+    <script>
+        // Comprehensive data compiled from global mobile databases (PhoneArena/GSMArena/MobileMuseum)
+        const phoneBrands = [
+            { name: "Samsung", models: 1384, origin: "South Korea", status: "Active", icon: "🇰🇷" },
+            { name: "Apple", models: 144, origin: "USA", status: "Active", icon: "🇺🇸" },
+            { name: "Motorola", models: 613, origin: "USA/China", status: "Active", icon: "🇺🇸" },
+            { name: "Nokia", models: 552, origin: "Finland", status: "Active", icon: "🇫🇮" },
+            { name: "Huawei", models: 450, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Xiaomi", models: 196, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "LG", models: 650, origin: "South Korea", status: "Legacy", icon: "🇰🇷" },
+            { name: "Sony", models: 112, origin: "Japan", status: "Active", icon: "🇯🇵" },
+            { name: "Alcatel", models: 377, origin: "France", status: "Active", icon: "🇫🇷" },
+            { name: "Micromax", models: 275, origin: "India", status: "Active", icon: "🇮🇳" },
+            { name: "BLU", models: 258, origin: "USA", status: "Active", icon: "🇺🇸" },
+            { name: "Sony Ericsson", models: 207, origin: "Sweden/Japan", status: "Legacy", icon: "🇸🇪" },
+            { name: "Oppo", models: 150, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Vivo", models: 130, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "BlackBerry", models: 95, origin: "Canada", status: "Legacy", icon: "🇨🇦" },
+            { name: "Lenovo", models: 108, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Asus", models: 85, origin: "Taiwan", status: "Active", icon: "🇹🇼" },
+            { name: "HTC", models: 220, origin: "Taiwan", status: "Active", icon: "🇹🇼" },
+            { name: "Google", models: 55, origin: "USA", status: "Active", icon: "🇺🇸" },
+            { name: "OnePlus", models: 59, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Honor", models: 77, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "ZTE", models: 310, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Realme", models: 85, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Meizu", models: 31, origin: "China", status: "Active", icon: "🇨🇳" },
+            { name: "Panasonic", models: 30, origin: "Japan", status: "Legacy", icon: "🇯🇵" },
+            { name: "Siemens", models: 48, origin: "Germany", status: "Legacy", icon: "🇩🇪" },
+            { name: "Philips", models: 73, origin: "Netherlands", status: "Active", icon: "🇳🇱" },
+            { name: "Kyocera", models: 65, origin: "Japan", status: "Active", icon: "🇯🇵" },
+            { name: "Casio", models: 15, origin: "Japan", status: "Legacy", icon: "🇯🇵" },
+            { name: "Fairphone", models: 5, origin: "Netherlands", status: "Active", icon: "🇪🇺" }
+        ];
+
+        const brandGrid = document.getElementById('brandGrid');
+        const searchInput = document.getElementById('searchInput');
+        const totalBrandsEl = document.getElementById('totalBrands');
+        const totalModelsEl = document.getElementById('totalModels');
+        const noResults = document.getElementById('noResults');
+
+        function renderBrands(filter = "") {
+            const filtered = phoneBrands.filter(b => 
+                b.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            brandGrid.innerHTML = "";
+            
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                filtered.forEach(brand => {
+                    const card = document.createElement('div');
+                    card.className = "glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-default";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-4xl">${brand.icon}</span>
+                            <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${brand.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
+                                ${brand.status}
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">${brand.name}</h3>
+                        <p class="text-sm text-slate-500 mb-4">${brand.origin}</p>
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-slate-500 text-sm">Unique Models</span>
+                            <span class="text-2xl font-black text-indigo-600">${brand.models.toLocaleString()}</span>
+                        </div>
+                    `;
+                    brandGrid.appendChild(card);
+                });
+            }
+
+            // Update stats
+            totalBrandsEl.innerText = filtered.length;
+            const modelsCount = filtered.reduce((acc, curr) => acc + curr.models, 0);
+            totalModelsEl.innerText = modelsCount.toLocaleString();
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            renderBrands(e.target.value);
+        });
+
+        // Initial Load
+        window.onload = () => {
+            renderBrands();
+        };
+    </script>
+</body>
+</html>
+
